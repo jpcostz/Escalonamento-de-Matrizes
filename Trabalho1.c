@@ -46,9 +46,10 @@ double obter_valor(Matriz *m, int linha, int coluna) {
 // Insere ou atualiza um valor na matriz esparsa
 void inserir_valor(Matriz *m, int linha, int coluna, double valor) {
     
-    // Validação dos limites da matriz
+    // Validação dos limites da matriz (internamente ainda é 0 a total-1)
     if (linha < 0 || linha >= m->total_linhas || coluna < 0 || coluna >= m->total_colunas) {
-        printf("Erro: Posicao (%d, %d) invalida.\n", linha, coluna);
+        // Mostra o erro para o usuario no formato 1-based
+        printf("Erro: Posicao (%d, %d) invalida.\n", linha + 1, coluna + 1);
         return;
     }
 
@@ -87,14 +88,13 @@ void inserir_valor(Matriz *m, int linha, int coluna, double valor) {
     m->num_elementos++;
 }
 
-//Metodo de adiçao de valores para a matriz esparsa simplificado para o usuario
 // Metodo de adiçao de valores para a matriz esparsa simplificado para o usuario
 void insercao_simples(Matriz *m) {
     printf("\nPreencha a matriz %dx%d.\n", m->total_linhas, m->total_colunas);
     printf("Digite os %d valores de cada linha separados por espaco e pressione Enter.\n\n", m->total_colunas);
 
     for (int i = 0; i < m->total_linhas; i++) {
-        printf("Linha %d> ", i);
+        printf("Linha %d> ", i + 1); // Mostra +1 para o usuario
         
         for (int j = 0; j < m->total_colunas; j++) {
             double valor;
@@ -151,19 +151,21 @@ void escalonar_gauss(Matriz *m) {
     int r = 0; // linha atual do pivô
     
     for (int c = 0; c < m->total_colunas && r < m->total_linhas; c++) {
-        // Busca o primeiro pivô não nulo nesta coluna (a partir de r) sem pivoteamento parcial
+
         int pivo_linha = r;
-        if (fabs(obter_valor(m, r, c)) < 1e-6) {
-            for (int k = r + 1; k < m->total_linhas; k++) {
-                if (fabs(obter_valor(m, k, c)) > 1e-6) {
-                    pivo_linha = k;
-                    break;
-                }
+        double max_val = 0.0;
+        
+        // Busca o MAIOR valor absoluto na coluna para ser o pivô
+        for (int k = r; k < m->total_linhas; k++) {
+            double val = fabs(obter_valor(m, k, c));
+            if (val > max_val) {
+                max_val = val;
+                pivo_linha = k;
             }
         }
 
-        if (fabs(obter_valor(m, pivo_linha, c)) < 1e-6) {
-            // Toda a coluna é zero abaixo de r, vai para a próxima
+        // Se o maior valor for zero (ou quase zero), toda a coluna é zero. Avança para a próxima.
+        if (max_val < 1e-6) {
             continue;
         }
 
@@ -281,7 +283,7 @@ int main () {
                     } 
                     else if (opcao_insercao == 2) {
                         printf("\nDigite os valores da matriz no formato (linha coluna valor).\n");
-                        printf("Digite -1 na linha para terminar.\n");
+                        printf("Digite 0 na linha para terminar.\n");
                         
                         while (1) {
                             int linha, coluna;
@@ -289,10 +291,12 @@ int main () {
                             
                             printf("> ");
                             scanf("%d", &linha);
-                            if (linha == -1) break; // Termina a entrada de dados
+                            if (linha == 0) break; // Termina a entrada de dados se digitar 0
                             
                             scanf("%d %lf", &coluna, &valor);
-                            inserir_valor(&mz1, linha, coluna, valor);
+                            
+                            // Subtrai 1 para armazenar internamente no formato do C (começando em 0)
+                            inserir_valor(&mz1, linha - 1, coluna - 1, valor);
                         }
                     } 
                     else {
@@ -301,7 +305,8 @@ int main () {
                 }
 
                 matrizes[contagem_matrizes] = mz1;
-                printf("Matriz armazenada com o ID %d.\n", contagem_matrizes);
+                // Mostra o ID somando 1
+                printf("Matriz armazenada com o ID %d.\n", contagem_matrizes + 1);
                 contagem_matrizes++;
                 break;
 
@@ -310,8 +315,11 @@ int main () {
                     printf("Nenhuma matriz cadastrada ainda.\n");
                     break;
                 }
-                printf("Digite o ID da matriz a ser visualizada (0 a %d): ", contagem_matrizes - 1);
+
+                printf("Digite o ID da matriz a ser visualizada (1 a %d): ", contagem_matrizes);
                 scanf("%d", &id_matriz);
+                
+                id_matriz--; // Converte de volta para indice do array em C
                 
                 if (id_matriz >= 0 && id_matriz < contagem_matrizes) {
                     visualizar_matriz(&matrizes[id_matriz]);
@@ -331,8 +339,10 @@ int main () {
                     break;
                 }
                 
-                printf("Digite o ID da matriz a ser escalonada (0 a %d): ", contagem_matrizes - 1);
+                printf("Digite o ID da matriz a ser escalonada (1 a %d): ", contagem_matrizes);
                 scanf("%d", &id_matriz);
+                
+                id_matriz--; // Converte de volta para indice do array em C
                 
                 if (id_matriz >= 0 && id_matriz < contagem_matrizes) {
                     // Cria uma copia para preservar a matriz original intacta
@@ -346,7 +356,8 @@ int main () {
                         printf("Matriz escalonada (Gauss-Jordan - Reduzida) com sucesso.\n");
                     }
                     
-                    printf("Nova matriz gerada e armazenada com o ID: %d\n", contagem_matrizes);
+                    // Mostra o ID da nova matriz gerada somando 1
+                    printf("Nova matriz gerada e armazenada com o ID: %d\n", contagem_matrizes + 1);
                     contagem_matrizes++; // Aumenta o contador para a nova matriz
                 } else {
                     printf("ID de matriz invalido.\n");
