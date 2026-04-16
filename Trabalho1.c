@@ -88,7 +88,27 @@ void inserir_valor(Matriz *m, int linha, int coluna, double valor) {
 }
 
 //Metodo de adiçao de valores para a matriz esparsa simplificado para o usuario
-void insercao_simples(Matriz *m){}
+// Metodo de adiçao de valores para a matriz esparsa simplificado para o usuario
+void insercao_simples(Matriz *m) {
+    printf("\nPreencha a matriz %dx%d.\n", m->total_linhas, m->total_colunas);
+    printf("Digite os %d valores de cada linha separados por espaco e pressione Enter.\n\n", m->total_colunas);
+
+    for (int i = 0; i < m->total_linhas; i++) {
+        printf("Linha %d> ", i);
+        
+        for (int j = 0; j < m->total_colunas; j++) {
+            double valor;
+            scanf("%lf", &valor);
+            
+            // Otimização: Como é uma matriz esparsa, só precisamos chamar 
+            // a função de inserir se o usuário digitar um valor não-nulo.
+            if (fabs(valor) >= 1e-6) {
+                inserir_valor(m, i, j, valor);
+            }
+        }
+    }
+    printf("Matriz preenchida com sucesso!\n\n");
+}
 
 // Visualiza a matriz de forma formatada (em grade)
 void visualizar_matriz(Matriz *m) {
@@ -246,22 +266,40 @@ int main () {
                 scanf("%d %d", &tamx, &tamy);
                 
                 Matriz mz1 = criar_matriz(tamx, tamy, 4); // Capacidade inicial dinamica pequena
+
+                int opcao_insercao = 0;
                 
-                printf("Digite os valores da matriz no formato (linha coluna valor).\n");
-                printf("Digite -1 na linha para terminar.\n");
-                
-                while (1) {
-                    int linha, coluna;
-                    double valor;
+                while (opcao_insercao != 1 && opcao_insercao != 2) {
+                    printf("\nEscolha o metodo de insercao:\n");
+                    printf(" 1. Insercao Simples (linha por linha)\n");
+                    printf(" 2. Insercao Avancada (linha coluna valor)\n");
+                    printf("Escolha uma opcao: ");
+                    scanf("%d", &opcao_insercao);
                     
-                    printf("> ");
-                    scanf("%d", &linha);
-                    if (linha == -1) break; // Termina a entrada de dados
-                    
-                    scanf("%d %lf", &coluna, &valor);
-                    inserir_valor(&mz1, linha, coluna, valor);
+                    if (opcao_insercao == 1) {
+                        insercao_simples(&mz1);
+                    } 
+                    else if (opcao_insercao == 2) {
+                        printf("\nDigite os valores da matriz no formato (linha coluna valor).\n");
+                        printf("Digite -1 na linha para terminar.\n");
+                        
+                        while (1) {
+                            int linha, coluna;
+                            double valor;
+                            
+                            printf("> ");
+                            scanf("%d", &linha);
+                            if (linha == -1) break; // Termina a entrada de dados
+                            
+                            scanf("%d %lf", &coluna, &valor);
+                            inserir_valor(&mz1, linha, coluna, valor);
+                        }
+                    } 
+                    else {
+                        printf("Opcao invalida. Tente novamente.\n");
+                    }
                 }
-                
+
                 matrizes[contagem_matrizes] = mz1;
                 printf("Matriz armazenada com o ID %d.\n", contagem_matrizes);
                 contagem_matrizes++;
