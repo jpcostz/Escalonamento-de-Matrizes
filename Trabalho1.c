@@ -87,6 +87,9 @@ void inserir_valor(Matriz *m, int linha, int coluna, double valor) {
     m->num_elementos++;
 }
 
+//Metodo de adiçao de valores para a matriz esparsa simplificado para o usuario
+void insercao_simples(Matriz *m){}
+
 // Visualiza a matriz de forma formatada (em grade)
 void visualizar_matriz(Matriz *m) {
     printf("Matriz %dx%d (Elementos não nulos: %d):\n", m->total_linhas, m->total_colunas, m->num_elementos);
