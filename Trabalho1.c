@@ -112,7 +112,7 @@ void insercao_simples(Matriz *m) {
 
 // Visualiza a matriz de forma formatada (em grade)
 void visualizar_matriz(Matriz *m) {
-    printf("Matriz %dx%d (Elementos não nulos: %d):\n", m->total_linhas, m->total_colunas, m->num_elementos);
+    printf("Matriz %dx%d (Elementos nao nulos: %d):\n", m->total_linhas, m->total_colunas, m->num_elementos);
     for (int i = 0; i < m->total_linhas; i++) {
         for (int j = 0; j < m->total_colunas; j++) {
             double v = obter_valor(m, i, j);

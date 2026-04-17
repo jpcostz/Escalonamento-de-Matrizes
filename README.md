@@ -14,6 +14,7 @@ O programa roda via interface de linha de comando (CLI) e oferece as seguintes o
 - **Eliminação de Gauss-Jordan:** Transforma a matriz em sua forma escalonada reduzida (RREF - *Reduced Row Echelon Form*).
 - **Visualização Formatada:** Exibição em grade com tratamento de zeros absolutos.
 - **Histórico em Memória:** Permite armazenar e visualizar até 100 matrizes simultaneamente.
+- **Modo Guiado:** Apresenta as trocas de linhas e operações utilizadas pelo programa, podendo ser ativado ou desativado.
 
 ## 🧠 Diferenciais Técnicos
 
@@ -47,12 +48,14 @@ gcc Trabalho1.c -o matrizes -lm
 Ao iniciar o programa, você verá o menu principal:
 
 ```text
-=== Menu ===
+=== Menu === 
+  [Modo guiado: desativado]
  1. Inicializar nova Matriz
  2. Visualizar Matriz
  3. Escalonar Matriz (Gauss - Simples)
  4. Escalonar Matriz (Gauss-Jordan - Reduzida)
- 5. Sair
+ 5. Ativar/Desativar Modo Guiado (Mostra contas passo a passo)
+ 6. Sair
 Escolha uma opcao:
 ```
 
