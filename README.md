@@ -7,7 +7,8 @@ Este projeto é uma implementação em **C** de algoritmos clássicos de Álgebr
 O programa roda via interface de linha de comando (CLI) e oferece as seguintes opções:
 
 - **Inicialização Dinâmica:** Criação de matrizes de qualquer dimensão.
-- **Dois Métodos de Inserção:** - *Simples:* Preenchimento intuitivo linha por linha.
+- **Dois Métodos de Inserção:**
+  - *Simples:* Preenchimento intuitivo linha por linha.
   - *Avançado:* Inserção direta por coordenadas (linha, coluna, valor).
 - **Eliminação de Gauss (Simples):** Transforma a matriz em sua forma escalonada (Triangular Superior).
 - **Eliminação de Gauss-Jordan:** Transforma a matriz em sua forma escalonada reduzida (RREF - *Reduced Row Echelon Form*).
