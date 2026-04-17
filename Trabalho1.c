@@ -147,7 +147,7 @@ void trocar_linhas(Matriz *m, int r1, int r2) {
 }
 
 // Aplica a Eliminação de Gauss para escalonar a matriz (Forma Escalonada / Triangular Superior)
-void escalonar_gauss(Matriz *m) {
+void escalonar_gauss(Matriz *m, int contas) {
     int r = 0; // linha atual do pivô
     
     for (int c = 0; c < m->total_colunas && r < m->total_linhas; c++) {
@@ -164,20 +164,37 @@ void escalonar_gauss(Matriz *m) {
             }
         }
 
-        // Se o maior valor for zero (ou quase zero), toda a coluna é zero. Avança para a próxima.
+        // Se o maior valor for zero, toda a coluna é zero. Avança.
         if (max_val < 1e-6) {
             continue;
         }
 
-        // Troca apenas se o pivô atual for zero e achamos um não nulo abaixo
-        trocar_linhas(m, r, pivo_linha);
+        // Troca apenas se a linha do pivô for diferente da linha atual
+        if (pivo_linha != r) {
+            trocar_linhas(m, r, pivo_linha);
+            if (contas) {
+                printf("\n--- Passo: Troca de Linhas ---\n");
+                printf("L%d <-> L%d\n", r + 1, pivo_linha + 1);
+                visualizar_matriz(m);
+            }
+        }
 
-        // Zera as posicoes correspondentes nas linhas ABAIXO do pivô (Escalonamento Simples)
+        // Zera as posicoes correspondentes nas linhas ABAIXO do pivô
         double val_pivo = obter_valor(m, r, c);
+        int operacao_feita = 0; // Flag para saber se precisamos mostrar a matriz no final do loop
+        
         for (int i = r + 1; i < m->total_linhas; i++) {
             double fator = obter_valor(m, i, c) / val_pivo;
             
             if (fabs(fator) > 1e-6) {
+                operacao_feita = 1;
+                
+                if (contas) {
+                    // Exibe a conta matematica no formato: L2 <- L2 - (2.50) * L1
+                    printf("\n--- Passo: Zerar elemento da coluna %d ---\n", c + 1);
+                    printf("L%d <- L%d - (%.2f) * L%d\n", i + 1, i + 1, fator, r + 1);
+                }
+                
                 for (int j = c; j < m->total_colunas; j++) {
                     double v_r = obter_valor(m, r, j);
                     double v_i = obter_valor(m, i, j);
@@ -186,16 +203,21 @@ void escalonar_gauss(Matriz *m) {
                 }
             }
         }
-        r++; // Avança para a proxima linha para buscar um novo pivô
+        
+        // Mostra a matriz após zerar as linhas abaixo do pivô
+        if (contas && operacao_feita) {
+            visualizar_matriz(m);
+        }
+        
+        r++; // Avança para a proxima linha
     }
 }
 
 // Aplica a Eliminação de Gauss-Jordan para escalonar a matriz (RREF - Totalmente Reduzida)
-void escalonar_gauss_jordan(Matriz *m) {
+void escalonar_gauss_jordan(Matriz *m, int contas) {
     int r = 0; // linha atual do pivô
     
     for (int c = 0; c < m->total_colunas && r < m->total_linhas; c++) {
-        // Encontra o pivô nesta coluna (k >= r)
         int pivo_linha = r;
         double max_val = 0.0;
         
@@ -209,22 +231,42 @@ void escalonar_gauss_jordan(Matriz *m) {
 
         if (max_val < 1e-6) continue;
 
-        // Troca linha r com a linha do pivô
-        trocar_linhas(m, r, pivo_linha);
+        if (pivo_linha != r) {
+            trocar_linhas(m, r, pivo_linha);
+            if (contas) {
+                printf("\n--- Passo: Troca de Linhas ---\n");
+                printf("L%d <-> L%d\n", r + 1, pivo_linha + 1);
+                visualizar_matriz(m);
+            }
+        }
 
         // Divide a linha pivô pelo seu próprio valor para que o pivô vire 1
         double val_pivo = obter_valor(m, r, c);
-        for (int j = c; j < m->total_colunas; j++) {
-            double v = obter_valor(m, r, j);
-            if (fabs(v) > 1e-6) inserir_valor(m, r, j, v / val_pivo);
+        
+        if (fabs(val_pivo - 1.0) > 1e-6) { // Se o pivo não for 1, mostra a divisao
+            if (contas) {
+                printf("\n--- Passo: Tornar o Pivo igual a 1 ---\n");
+                printf("L%d <- L%d / %.2f\n", r + 1, r + 1, val_pivo);
+            }
+            for (int j = c; j < m->total_colunas; j++) {
+                double v = obter_valor(m, r, j);
+                if (fabs(v) > 1e-6) inserir_valor(m, r, j, v / val_pivo);
+            }
+            if (contas) visualizar_matriz(m);
         }
 
-        // Zera as posicoes correspondentes nas demais linhas (Escalonamento Reduzido)
+        // Zera as posicoes nas DEMAIS linhas (acima e abaixo)
+        int operacao_feita = 0;
         for (int i = 0; i < m->total_linhas; i++) {
             if (i == r) continue;
             
             double fator = obter_valor(m, i, c);
             if (fabs(fator) > 1e-6) {
+                operacao_feita = 1;
+                if (contas) {
+                    printf("\n--- Passo: Zerar elemento acima/abaixo do pivo ---\n");
+                    printf("L%d <- L%d - (%.2f) * L%d\n", i + 1, i + 1, fator, r + 1);
+                }
                 for (int j = c; j < m->total_colunas; j++) {
                     double v_r = obter_valor(m, r, j);
                     double v_i = obter_valor(m, i, j);
@@ -233,6 +275,8 @@ void escalonar_gauss_jordan(Matriz *m) {
                 }
             }
         }
+        if (contas && operacao_feita) visualizar_matriz(m);
+        
         r++; 
     }
 }
@@ -241,18 +285,20 @@ int main () {
     int tamx, tamy;
     int menu;
     int id_matriz;
+    int contas = 0; //variavel para demonstracao de contas
     
     // Armazenar ate 100 matrizes para permitir os acessos por "numero da matriz"
     Matriz matrizes[100];
     int contagem_matrizes = 0;
 
     while(1) {
-        printf("\n=== Menu ===\n");
+        printf("\n=== Menu ===\n [Modo guiado: %s]\n", (contas) ? "ativado" : "desativado");
         printf(" 1. Inicializar nova Matriz\n");
         printf(" 2. Visualizar Matriz\n");
         printf(" 3. Escalonar Matriz (Gauss - Simples)\n");
         printf(" 4. Escalonar Matriz (Gauss-Jordan - Reduzida)\n");
-        printf(" 5. Sair\n");
+        printf(" 5. Ativar/Desativar Modo Guiado (Mostra contas passo a passo)\n");
+        printf(" 6. Sair\n");
         printf("Escolha uma opcao: ");
         
         if (scanf("%d", &menu) != 1) break;
@@ -349,10 +395,10 @@ int main () {
                     matrizes[contagem_matrizes] = copiar_matriz(&matrizes[id_matriz]);
                     
                     if (menu == 3) {
-                        escalonar_gauss(&matrizes[contagem_matrizes]);
+                        escalonar_gauss(&matrizes[contagem_matrizes], contas);
                         printf("Matriz escalonada (Gauss - Simples) com sucesso.\n");
                     } else {
-                        escalonar_gauss_jordan(&matrizes[contagem_matrizes]);
+                        escalonar_gauss_jordan(&matrizes[contagem_matrizes], contas);
                         printf("Matriz escalonada (Gauss-Jordan - Reduzida) com sucesso.\n");
                     }
                     
@@ -363,8 +409,13 @@ int main () {
                     printf("ID de matriz invalido.\n");
                 }
                 break;
-
+            
             case 5:
+                contas = !contas; // Alterna entre 0 e 1
+                printf("\nModo guiado %s.\n", (contas) ? "ativado" : "desativado");
+                break;
+                
+            case 6:
                 // Libera a memoria antes de sair
                 for(int i = 0; i < contagem_matrizes; i++){
                     free(matrizes[i].elementos);
