@@ -37,6 +37,7 @@ cd escalonamento-de-matrizes
 gcc Trabalho1.c -o matrizes -lm
 ```
 (Nota: a flag -lm é necessária em alguns ambientes Linux para linkar a biblioteca <math.h>)
+
 3. Execute o programa:
 ```bash
 ./matrizes
